@@ -1,0 +1,97 @@
+{% extends "shop/base.html" %}
+
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <ul class="list-group" id="item_list">
+            <h3 class="text-center">
+                Voici votre liste
+            </h3>
+
+        </ul>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" id="items" name="items">
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label for="nom">Nom</label>
+      <input type="text" class="form-control" id="nom" placeholder="Nom" name="nom">
+    </div>
+    <div class="form-group col-md-6">
+      <label for="email">Email</label>
+      <input type="email" class="form-control" id="email" placeholder="exemple@mail.fr" name="email">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="adresse">Adresse</label>
+    <input type="text" class="form-control" id="adresse" placeholder="1234 Main St" name="adresse">
+  </div>
+
+  <div class="form-row">
+    <div class="form-group col-md-6">
+      <label for="ville">Ville</label>
+      <input type="text" class="form-control" id="ville" name="ville">
+    </div>
+    <div class="form-group col-md-4">
+      <label for="pays">Pays</label>
+      <select id="pays" class="form-control" name="pays">
+        <option selected>Veuillez selectionner un pays</option>
+        <option>France</option> <option>Italie</option> <option>Belgique</option>
+
+      </select>
+    </div>
+    <div class="form-group col-md-2">
+      <label for="zip">Zip</label>
+      <input type="text" class="form-control" id="zip" name="zip">
+    </div>
+      <div class="form-group col-md-2">
+      <label for="zip">Somme Total à payer</label>
+      <input type="readonly" class="form-control" id="total" name="total">
+    </div>
+  </div>
+  <div class="form-group">
+
+  </div>
+  <button type="submit" class="btn btn-primary">Commander</button>
+       </form>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block js %}
+<script type="text/javascript">
+    let panier = localStorage.getItem('panier') ?JSON.parse(localStorage.getItem('panier')) : {};
+    let total=0;
+    let nombre=0;
+    for(let item in panier){
+        let nom=panier[item][1];
+        let quantite=panier[item][0];
+        let prix=panier[item][2];
+        nombre+=quantite;
+        total+=prix;
+        let itemString=`<li class="list-group-item d-flex justify-content-between align-items-center">
+${nom}        <span class="badge badge-warning badge-pill">QTE:${quantite}</span>
+              <span class="badge badge-primary badge-pill">${prix}€</span>
+          </li>`
+        $('#item_list').append(itemString);
+
+    }
+    let itemNombre=`<li class="list-group-item d-flex justify-content-between align-items-center">
+<b class="bg-danger">PRIX ET QUANTITE TOTAL</b> <span class="badge badge-warning badge-pill">QTE:${nombre}</span>
+              TOTAL<span class="badge badge-danger badge-pill"> ${total}€</span>
+          </li>`
+        $('#item_list').append(itemNombre);
+        $('#total').val("€"+total);
+
+
+    $('#items').val(JSON.stringify(panier));
+</script>
+
+{% endblock %}

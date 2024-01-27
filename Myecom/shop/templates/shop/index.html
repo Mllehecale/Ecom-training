@@ -1,0 +1,107 @@
+let panier; {% extends "shop/base.html" %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-12">
+        <form class="card card-sm">
+            <div class="card-body row no-gutters align-items-center">
+                <div class="col">
+                    <label>
+                        <input  placeholder="Entrer le nom du produit que vous cherchez." type="search" name="item-name" class="form-control-borderless">
+                    </label>
+                </div>
+               <div class="col-auto">
+                   <button type="submit" class="btn btn-success">Recherche</button>
+               </div>
+
+            </div>
+        </form>
+    </div>
+
+</div>
+
+<div class="row">
+    {% for product in product_object %}
+    <div class="col-md-3">
+        <div class="card">
+            <img src="{{product.image}}" class="card-img-top" alt="">
+            <div class="card-body">
+                <div id="aa{{product.id}}" class="card-title" >{{product.title}}</div>
+                <div id="price{{product.id}}" style="color:darkorange" class="card-text">{{product.price}}</div>
+                <a href="{{product.id}}" class="btn btn-warning">Voir</a>
+                <button class="btn btn-success ted " id="{{product.id}}">Ajouter</button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<div class="row mt-3">
+    <div class="col-md-3 offset-md-4">
+        <ul class="pagination">
+            {% if product_object.has_previous %}
+                <li class="page_item">
+                    <a class="page-link" href="?page={{product_object.previous_page_number}}">Précédent</a>
+                </li>
+            {% endif %}
+                <li class="page-item active">
+                    <a class="page_link" href="?page={{product_object.number}}">{{product_object.number}}</a>
+                </li>
+            {% if product_object.has_next %}
+                <li class="page_item">
+                    <a class="page-link" href="?page={{product_object.next_page_number}}">Suivant</a>
+                </li>
+            {% endif %}
+
+        </ul>
+    </div>
+</div>
+
+{% endblock %}
+
+
+<!-- le code pour la partie js-->
+{% block js %}
+<script type="text/javascript">
+        console.log('test');
+    if(localStorage.getItem('panier')===null){
+        let panier = {};
+    }else{
+        panier=JSON.parse(localStorage.getItem('panier'))
+    }
+    //ici on récupère le clique donc il faut ajouter une class ted au Bouton Ajouter//
+    $(document).on('click', '.ted',function () {
+        let item_id = this.id.toString();
+        if(panier[item_id]!== undefined){
+            quantite=panier[item_id][0]+1;
+            panier[item_id][0]=quantite;
+            panier[item_id][2]+=parseFloat(document.getElementById("price"+item_id).innerText);
+        }else{
+            quantite=1;
+            prix=parseFloat(document.getElementById("price"+item_id).innerText);
+            nom=document.getElementById("aa"+item_id).innerText;
+            panier[item_id]=[quantite,nom,prix];
+        }
+        localStorage.setItem('panier', JSON.stringify(panier));
+        // pour le compteur d'articles. on prend la longueur qui se calcule en fonction des clés et non valeur//
+        document.getElementById("panier").innerHTML="Panier("+Object.keys(panier).length+")";
+
+    });
+    AfficheList(panier);
+    function AfficheList(panier){
+        let panierString = "";
+        let index = 1;
+        /*panierString +="<h5>voici liste</h5>";*/
+        panierString+=index;
+        for (let x in panier){
+            panierString+=index;
+            panierString+=document.getElementById("aa"+x).innerText+"QTE:"+panier[x][0]+"</br>";
+            index+=1;
+            }
+        panierString+="<a href='/checkout' class='btn btn-primary'>Checkout</a>"
+        $('[data-toggle="popover"]').popover();
+        document.getElementById('panier').setAttribute('data-content',panierString);
+    }
+
+</script>
+{% endblock %}
